@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="38" fill="#1B3A3D"/>
+  <!-- Datáfono cuerpo -->
+  <rect x="56" y="44" width="80" height="104" rx="10" fill="none" stroke="#F5F2EC" stroke-width="5"/>
+  <!-- Pantalla -->
+  <rect x="66" y="56" width="60" height="32" rx="5" fill="#8AACB0"/>
+  <!-- Teclado: 6 puntos en 2 filas de 3 -->
+  <circle cx="76" cy="108" r="5" fill="#F5F2EC"/>
+  <circle cx="96" cy="108" r="5" fill="#F5F2EC"/>
+  <circle cx="116" cy="108" r="5" fill="#F5F2EC"/>
+  <circle cx="76" cy="124" r="5" fill="#F5F2EC"/>
+  <circle cx="96" cy="124" r="5" fill="#F5F2EC"/>
+  <!-- Punto inferior derecho en naranja -->
+  <circle cx="116" cy="124" r="5" fill="#E8531A"/>
+</svg>
