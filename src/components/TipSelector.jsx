@@ -1,6 +1,6 @@
 import { formatEur, smartRound } from '../utils/format'
 
-const PCT_OPTS = [0, 5, 8, 10]
+const PCT_OPTS = [5, 8, 10, 0]
 
 /**
  * Controlled component — el padre mantiene mode y selectedPct.
@@ -35,7 +35,7 @@ export default function TipSelector({ total, pax, mode, onModeChange, selectedPc
       {mode === 'round' ? (
         /* ── Panel redondeo ── */
         <div style={{
-          background: 'var(--orange)', borderRadius: 14,
+          background: 'var(--orange)', borderRadius: 14, marginTop: 12,
           padding: '16px', display: 'flex', alignItems: 'center', gap: 12
         }}>
           <div style={{ flex: 1 }}>
@@ -55,12 +55,13 @@ export default function TipSelector({ total, pax, mode, onModeChange, selectedPc
         </div>
       ) : (
         /* ── Panel porcentaje ── */
-        <div className="tip-options" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+        <div className="tip-options" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginTop: 12 }}>
           {PCT_OPTS.map(pct => (
             <button
               key={pct}
               className={`tip-option${selectedPct === pct ? ' selected' : ''}`}
               onClick={() => onPctChange(pct)}
+              style={pct === 0 ? { opacity: 0.6 } : undefined}
             >
               <div className="pct">{pct}%</div>
               <div className="eur">
