@@ -7,7 +7,7 @@ function initials(name) {
   return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 }
 
-export default function BizumTrackingScreen({ payment, onBack }) {
+export default function BizumTrackingScreen({ payment, onBack, onBurger }) {
   const others = (payment.pax || 2) - 1
 
   const diners = useMemo(() =>
@@ -33,7 +33,7 @@ export default function BizumTrackingScreen({ payment, onBack }) {
   return (
     <div className="screen">
       {/* Header */}
-      <div className="header" style={{ padding: '16px 20px' }}>
+      <div className="header row-between" style={{ padding: '16px 20px', flexDirection: 'row', alignItems: 'center' }}>
         <div className="row gap-12" style={{ alignItems: 'center' }}>
           <button
             style={{ background: 'none', border: 'none', color: 'rgba(245,242,236,0.6)', cursor: 'pointer', padding: 4, display: 'flex' }}
@@ -50,6 +50,11 @@ export default function BizumTrackingScreen({ payment, onBack }) {
             </p>
           </div>
         </div>
+        {onBurger && (
+          <button onClick={onBurger} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
+            {[0,1,2].map(i => <span key={i} style={{ display: 'block', width: 20, height: 2, borderRadius: 2, background: 'rgba(245,242,236,0.8)' }}/>)}
+          </button>
+        )}
       </div>
 
       <div className="stack gap-12 p-16" style={{ flex: 1, overflowY: 'auto', paddingBottom: 32 }}>

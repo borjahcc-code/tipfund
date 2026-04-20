@@ -1,31 +1,29 @@
 import { useState } from 'react'
-import { formatEur, nextRound5, nextRound10 } from '../utils/format'
-import Logo from '../components/Logo'
-import PeopleSelector from '../components/PeopleSelector'
+import { formatEur, smartRound } from '../utils/format'
+import Logo            from '../components/Logo'
+import PeopleSelector  from '../components/PeopleSelector'
+import TipSelector     from '../components/TipSelector'
+import { BurgerButton } from '../components/BurgerMenu'
 
-const PCT_OPTIONS = [
-  { pct: 5,  label: '5%' },
-  { pct: 8,  label: '8%' },
-  { pct: 10, label: '10%' },
-]
-
-export default function ManualScreen({ onContinue, onBack }) {
+export default function ManualScreen({ onContinue, onBack, onBurger }) {
   const [rawValue, setRawValue] = useState('')
   const [pax,      setPax]      = useState(2)
-  // tipPct: number (5/8/10) or null (= redondear)
+  const [tipMode,  setTipMode]  = useState('round')
   const [tipPct,   setTipPct]   = useState(8)
 
-  // total: importe bruto sin propina
+  // total bruto sin propina
   const total = parseFloat(rawValue.replace(',', '.')) || 0
 
-  const round5  = total > 0 ? nextRound5(total)  : 0
-  const round10 = total > 0 ? nextRound10(total) : 0
-
-  const tipAmount    = total === 0 ? 0
-    : tipPct === null ? Math.max(0, round5 - total)
+  // ── Cálculo principal ─────────────────────────────────────
+  const roundedTotal  = total > 0 ? smartRound(total) : 0
+  const tipAmount     = total === 0 ? 0
+    : tipMode === 'round' ? Math.max(0, roundedTotal - total)
     : total * tipPct / 100
-  const perPerson    = total > 0 ? (total + tipAmount) / pax : 0
-  const tipPerPerson = total > 0 ? tipAmount / pax : 0
+
+  const basePerPerson = total > 0 ? total / pax : 0          // 100 / 4 = 25,00 €
+  const tipPerPerson  = total > 0 ? tipAmount / pax : 0
+  const perPerson     = basePerPerson + tipPerPerson
+  // ──────────────────────────────────────────────────────────
 
   function handleInput(e) {
     const v = e.target.value
@@ -34,23 +32,26 @@ export default function ManualScreen({ onContinue, onBack }) {
 
   function handleContinue() {
     if (total <= 0) return
-    // Pasamos el total BRUTO — ResultScreen aplica su propia propina
+    // Pasa el total BRUTO — ResultScreen aplica su propia propina
     onContinue({ nombre: 'Importe manual', total, pax })
   }
 
   return (
     <div className="screen">
       {/* Header */}
-      <div className="header row" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: '16px 20px' }}>
-        <button
-          style={{ background: 'none', border: 'none', color: 'rgba(245,242,236,0.6)', cursor: 'pointer', padding: 4, display: 'flex' }}
-          onClick={onBack}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-        <Logo size={22} />
+      <div className="header row-between" style={{ flexDirection: 'row', alignItems: 'center', padding: '16px 20px' }}>
+        <div className="row gap-10">
+          <button
+            style={{ background: 'none', border: 'none', color: 'rgba(245,242,236,0.6)', cursor: 'pointer', padding: 4, display: 'flex' }}
+            onClick={onBack}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <Logo size={22} />
+        </div>
+        <BurgerButton onClick={onBurger} />
       </div>
 
       <div className="stack gap-16 p-16" style={{ flex: 1, paddingTop: 24, overflowY: 'auto', paddingBottom: 32 }}>
@@ -84,51 +85,19 @@ export default function ManualScreen({ onContinue, onBack }) {
         </div>
 
         {/* Propina */}
-        <div className="card stack gap-12">
-          <div className="row-between">
+        {total > 0 && (
+          <div className="card stack gap-12">
             <p style={{ fontWeight: 700, fontSize: 15 }}>Propina</p>
-            <p className="text-xs text-sec">por persona</p>
+            <TipSelector
+              total={total}
+              pax={pax}
+              mode={tipMode}
+              onModeChange={setTipMode}
+              selectedPct={tipPct}
+              onPctChange={setTipPct}
+            />
           </div>
-
-          <div className="tip-options">
-            {/* Redondear */}
-            <button
-              className={`tip-option tip-option-round${tipPct === null ? ' selected' : ''}`}
-              onClick={() => setTipPct(null)}
-            >
-              <div className="row gap-8" style={{ alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <div className="row gap-6" style={{ alignItems: 'center' }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-                  </svg>
-                  <span className="pct">Redondear</span>
-                </div>
-                <span className="eur" style={{ fontSize: 11 }}>
-                  {total > 0
-                    ? `→ ${formatEur(round5).replace(' €', '')} o ${formatEur(round10).replace(' €', '')} €`
-                    : '→ —'}
-                </span>
-              </div>
-              <div className="eur" style={{ marginTop: 4, textAlign: 'left' }}>
-                {total > 0 ? `${formatEur(Math.max(0, round5 - total) / pax)} por persona` : '—'}
-              </div>
-            </button>
-
-            {/* Opciones porcentaje */}
-            {PCT_OPTIONS.map(opt => (
-              <button
-                key={opt.pct}
-                className={`tip-option${tipPct === opt.pct ? ' selected' : ''}`}
-                onClick={() => setTipPct(opt.pct)}
-              >
-                <div className="pct">{opt.label}</div>
-                <div className="eur">
-                  {total > 0 ? formatEur(total * opt.pct / 100 / pax) : '—'}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+        )}
 
         {/* Live result */}
         {total > 0 && (
@@ -136,7 +105,7 @@ export default function ManualScreen({ onContinue, onBack }) {
             <p className="amount-label">cada persona paga</p>
             <p className="amount-big">{formatEur(perPerson)}</p>
             <p style={{ fontSize: 12, color: 'rgba(245,242,236,0.45)', marginTop: 4 }}>
-              {formatEur(total / pax)} base + {formatEur(tipPerPerson)} propina
+              {formatEur(basePerPerson)} base + {formatEur(tipPerPerson)} propina
             </p>
           </div>
         )}

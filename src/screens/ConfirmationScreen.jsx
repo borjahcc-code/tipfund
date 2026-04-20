@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { formatEur } from '../utils/format'
+import { BurgerButton } from '../components/BurgerMenu'
 
-export default function ConfirmationScreen({ payment, onHome, onTracking }) {
+export default function ConfirmationScreen({ payment, onHome, onTracking, onBurger }) {
   const [installing, setInstalling] = useState(false)
-  const [installed, setInstalled] = useState(false)
+  const [installed,  setInstalled]  = useState(false)
 
   function handleInstall() {
     setInstalling(true)
@@ -11,10 +12,15 @@ export default function ConfirmationScreen({ payment, onHome, onTracking }) {
   }
 
   return (
-    <div className="screen" style={{ alignItems: 'center', justifyContent: 'center', padding: '32px 20px', gap: 0 }}>
+    <div className="screen" style={{ alignItems: 'center', padding: '32px 20px 24px', gap: 0 }}>
+
+      {/* Burger */}
+      <div style={{ position: 'absolute', top: 16, right: 16 }}>
+        <BurgerButton onClick={onBurger} light={false} />
+      </div>
 
       {/* Animated check */}
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 20, marginTop: 20 }}>
         <svg className="check-circle" viewBox="0 0 80 80">
           <circle cx="40" cy="40" r="36"/>
           <path d="M24 40 L35 51 L56 28"/>
@@ -54,7 +60,7 @@ export default function ConfirmationScreen({ payment, onHome, onTracking }) {
 
       {/* PWA install card */}
       {!installed ? (
-        <div className="card-dark stack gap-10" style={{ width: '100%', marginBottom: 20 }}>
+        <div className="card-dark stack gap-10" style={{ width: '100%', marginBottom: 12 }}>
           <div className="row gap-8">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal-conf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M13 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V9l-7-7z"/><path d="M13 2v7h7"/>
@@ -88,14 +94,13 @@ export default function ConfirmationScreen({ payment, onHome, onTracking }) {
           </button>
         </div>
       ) : (
-        <div className="card stack gap-8" style={{ width: '100%', marginBottom: 20, textAlign: 'center' }}>
+        <div className="card stack gap-8" style={{ width: '100%', marginBottom: 12, textAlign: 'center' }}>
           <span style={{ fontSize: 24 }}>🎉</span>
           <p style={{ fontWeight: 700, color: 'var(--teal-dark)' }}>¡Añadida a tu inicio!</p>
           <p className="text-xs text-sec">Ya puedes abrir tipFund directamente</p>
         </div>
       )}
 
-      {/* Seguimiento de pagos — solo si vino del flujo de grupo */}
       {payment?.pax && onTracking && (
         <button
           className="btn btn-secondary"

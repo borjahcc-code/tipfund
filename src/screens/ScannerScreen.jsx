@@ -1,6 +1,13 @@
-export default function ScannerScreen({ onCapture, onCancel }) {
+import { BurgerButton } from '../components/BurgerMenu'
+
+export default function ScannerScreen({ onCapture, onCancel, onBurger }) {
   return (
-    <div className="scanner-screen">
+    <div className="scanner-screen" style={{ position: 'relative' }}>
+      {/* Burger flotante */}
+      <div style={{ position: 'absolute', top: 16, right: 16 }}>
+        <BurgerButton onClick={onBurger} />
+      </div>
+
       <div style={{ textAlign: 'center' }}>
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>
           Cámara
@@ -16,8 +23,6 @@ export default function ScannerScreen({ onCapture, onCancel }) {
         <div className="corner tr"/>
         <div className="corner bl"/>
         <div className="corner br"/>
-
-        {/* Ticket icon hint */}
         <div style={{
           position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
           justifyContent: 'center', flexDirection: 'column', gap: 8
@@ -34,7 +39,6 @@ export default function ScannerScreen({ onCapture, onCancel }) {
         Asegúrate de que el total sea visible
       </p>
 
-      {/* Actions */}
       <div className="stack gap-12" style={{ width: '100%' }}>
         <button className="btn btn-orange" onClick={onCapture}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

@@ -8,7 +8,7 @@ function initials(name) {
   return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 }
 
-export default function BizumGroupScreen({ data, onDone, onSkip }) {
+export default function BizumGroupScreen({ data, onDone, onSkip, onBurger }) {
   const others = data.pax - 1
   const names = NAMES.slice(0, others)
   const [statuses, setStatuses] = useState(names.map(() => 'pending'))
@@ -36,9 +36,16 @@ export default function BizumGroupScreen({ data, onDone, onSkip }) {
       </div>
 
       {/* Header */}
-      <div className="header" style={{ padding: '14px 20px' }}>
-        <p style={{ fontWeight: 700, fontSize: 17, color: 'var(--beige-light)' }}>Solicitar Bizum al resto</p>
-        <p style={{ fontSize: 13, color: 'rgba(245,242,236,0.55)' }}>{others} personas · {formatEur(data.perPerson)} cada una</p>
+      <div className="header row-between" style={{ padding: '14px 20px', flexDirection: 'row', alignItems: 'center' }}>
+        <div>
+          <p style={{ fontWeight: 700, fontSize: 17, color: 'var(--beige-light)' }}>Solicitar Bizum al resto</p>
+          <p style={{ fontSize: 13, color: 'rgba(245,242,236,0.55)' }}>{others} personas · {formatEur(data.perPerson)} cada una</p>
+        </div>
+        {onBurger && (
+          <button onClick={onBurger} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
+            {[0,1,2].map(i => <span key={i} style={{ display: 'block', width: 20, height: 2, borderRadius: 2, background: 'rgba(245,242,236,0.8)' }}/>)}
+          </button>
+        )}
       </div>
 
       <div className="stack gap-12 p-16" style={{ flex: 1, overflowY: 'auto', paddingBottom: 28 }}>

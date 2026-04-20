@@ -526,3 +526,78 @@ html, body {
 
 /* Transition for status badge changes */
 .status-badge { transition: background 0.3s, color 0.3s; }
+
+/* ── Tip toggle ── */
+.tip-toggle {
+  display: flex;
+  background: var(--beige);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 3px;
+  gap: 3px;
+}
+.tip-toggle-btn {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-sec);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.tip-toggle-btn.active {
+  background: var(--beige-light);
+  color: var(--teal-dark);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* ── Burger overlay ── */
+.burger-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+}
+.burger-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  animation: fadeIn 0.2s ease;
+}
+.burger-panel {
+  position: relative;
+  width: 280px;
+  max-width: 85vw;
+  background: var(--beige-light);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+  animation: slideInRight 0.25s ease;
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+.burger-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 20px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+  font-family: inherit;
+  color: var(--text-main);
+}
+.burger-item:last-child { border-bottom: none; }
+.burger-item:active { background: var(--beige); }

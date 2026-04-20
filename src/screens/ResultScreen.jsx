@@ -1,35 +1,30 @@
 import { useState } from 'react'
-import { formatEur, nextRound5, nextRound10 } from '../utils/format'
+import { formatEur, smartRound } from '../utils/format'
 import PeopleSelector from '../components/PeopleSelector'
+import TipSelector    from '../components/TipSelector'
+import { BurgerButton } from '../components/BurgerMenu'
 
-const PCT_OPTIONS = [
-  { pct: 5,  label: '5%' },
-  { pct: 8,  label: '8%' },
-  { pct: 10, label: '10%' },
-]
-
-export default function ResultScreen({ ocr, onPay, onGroup }) {
+export default function ResultScreen({ ocr, onPay, onGroup, onBurger }) {
   const [total,   setTotal]   = useState(ocr.total)
   const [pax,     setPax]     = useState(ocr.pax)
-  // tipPct: number (5/8/10) or null (= redondear)
+  const [tipMode, setTipMode] = useState('round')
   const [tipPct,  setTipPct]  = useState(8)
   const [editing, setEditing] = useState(false)
   const [editVal, setEditVal] = useState(String(ocr.total))
 
-  const round5  = nextRound5(total)
-  const round10 = nextRound10(total)
+  // ── Cálculo principal ─────────────────────────────────────
+  const roundedTotal = smartRound(total)
+  const tipAmount    = tipMode === 'round'
+    ? Math.max(0, roundedTotal - total)
+    : total * tipPct / 100
 
-  const tipAmount    = tipPct === null ? Math.max(0, round5 - total) : total * tipPct / 100
-  const basePerPerson = total / pax
-  const perPerson     = basePerPerson + tipAmount / pax
+  const basePerPerson = total / pax                  // 100 / 4 = 25,00 €
   const tipPerPerson  = tipAmount / pax
-
-  // TODO: quitar estos logs tras verificar el cálculo
-  console.log('[TipFund] total=', total, 'pax=', pax, 'tipPct=', tipPct, '→ base/persona=', basePerPerson.toFixed(2), 'total/persona=', perPerson.toFixed(2))
+  const perPerson     = basePerPerson + tipPerPerson  // total a pagar por persona
+  // ──────────────────────────────────────────────────────────
 
   function saveEdit() {
     const v = parseFloat(editVal.replace(',', '.'))
-    console.log('[TipFund] saveEdit: editVal=', editVal, '→ v=', v)
     if (!isNaN(v) && v > 0) {
       setTotal(v)
       setEditVal(v.toFixed(2).replace('.', ','))
@@ -45,7 +40,12 @@ export default function ResultScreen({ ocr, onPay, onGroup }) {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           OCR listo
         </span>
-        <span style={{ fontSize: 14, color: 'rgba(245,242,236,0.6)' }}>{ocr.nombre}</span>
+        <div className="row gap-8">
+          <span style={{ fontSize: 13, color: 'rgba(245,242,236,0.6)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {ocr.nombre}
+          </span>
+          <BurgerButton onClick={onBurger} />
+        </div>
       </div>
 
       <div className="stack gap-12 p-16" style={{ flex: 1, overflowY: 'auto', paddingBottom: 32 }}>
@@ -90,8 +90,8 @@ export default function ResultScreen({ ocr, onPay, onGroup }) {
             </div>
             {!editing && (
               <button
-                style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 12px', fontSize: 13, color: 'var(--text-sec)', cursor: 'pointer', fontFamily: 'inherit' }}
-                onClick={() => { setEditVal(String(total)); setEditing(true) }}
+                style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 12px', fontSize: 13, color: 'var(--text-sec)', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}
+                onClick={() => { setEditVal(String(total).replace('.', ',')); setEditing(true) }}
               >
                 Modificar importe
               </button>
@@ -114,7 +114,7 @@ export default function ResultScreen({ ocr, onPay, onGroup }) {
           <p className="amount-label">cada persona paga</p>
           <p className="amount-big">{formatEur(perPerson)}</p>
           <p style={{ fontSize: 12, color: 'rgba(245,242,236,0.45)', marginTop: 4 }}>
-            {formatEur(total / pax)} base + {formatEur(tipPerPerson)} propina
+            {formatEur(basePerPerson)} base + {formatEur(tipPerPerson)} propina
           </p>
         </div>
 
@@ -122,43 +122,15 @@ export default function ResultScreen({ ocr, onPay, onGroup }) {
         <div className="card stack gap-12">
           <div className="row-between">
             <p style={{ fontWeight: 700, fontSize: 15 }}>Propina</p>
-            <p className="text-xs text-sec">por persona</p>
           </div>
-
-          <div className="tip-options">
-            {/* Opción Redondear — ocupa todo el ancho */}
-            <button
-              className={`tip-option tip-option-round${tipPct === null ? ' selected' : ''}`}
-              onClick={() => setTipPct(null)}
-            >
-              <div className="row gap-8" style={{ alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <div className="row gap-6" style={{ alignItems: 'center' }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-                  </svg>
-                  <span className="pct">Redondear</span>
-                </div>
-                <span className="eur" style={{ fontSize: 11 }}>
-                  → {formatEur(round5).replace(' €', '')} o {formatEur(round10).replace(' €', '')} €
-                </span>
-              </div>
-              <div className="eur" style={{ marginTop: 4, textAlign: 'left' }}>
-                {formatEur(Math.max(0, round5 - total) / pax)} por persona
-              </div>
-            </button>
-
-            {/* Opciones porcentaje */}
-            {PCT_OPTIONS.map(opt => (
-              <button
-                key={opt.pct}
-                className={`tip-option${tipPct === opt.pct ? ' selected' : ''}`}
-                onClick={() => setTipPct(opt.pct)}
-              >
-                <div className="pct">{opt.label}</div>
-                <div className="eur">{formatEur(total * opt.pct / 100 / pax)}</div>
-              </button>
-            ))}
-          </div>
+          <TipSelector
+            total={total}
+            pax={pax}
+            mode={tipMode}
+            onModeChange={setTipMode}
+            selectedPct={tipPct}
+            onPctChange={setTipPct}
+          />
         </div>
 
         {/* Total a pagar */}
