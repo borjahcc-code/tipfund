@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { formatEur } from '../utils/format'
+import { formatEur, nextRound5, nextRound10 } from '../utils/format'
 import Logo from '../components/Logo'
 import PeopleSelector from '../components/PeopleSelector'
 
-const TIP_OPTIONS = [
+const PCT_OPTIONS = [
   { pct: 5,  label: '5%' },
   { pct: 8,  label: '8%' },
   { pct: 10, label: '10%' },
@@ -12,12 +12,19 @@ const TIP_OPTIONS = [
 export default function ManualScreen({ onContinue, onBack }) {
   const [rawValue, setRawValue] = useState('')
   const [pax,      setPax]      = useState(2)
+  // tipPct: number (5/8/10) or null (= redondear)
   const [tipPct,   setTipPct]   = useState(8)
 
-  const total        = parseFloat(rawValue.replace(',', '.')) || 0
-  const tipAmount    = total * tipPct / 100
-  const totalWTip    = total + tipAmount
-  const perPerson    = total > 0 ? totalWTip / pax : 0
+  // total: importe bruto sin propina
+  const total = parseFloat(rawValue.replace(',', '.')) || 0
+
+  const round5  = total > 0 ? nextRound5(total)  : 0
+  const round10 = total > 0 ? nextRound10(total) : 0
+
+  const tipAmount    = total === 0 ? 0
+    : tipPct === null ? Math.max(0, round5 - total)
+    : total * tipPct / 100
+  const perPerson    = total > 0 ? (total + tipAmount) / pax : 0
   const tipPerPerson = total > 0 ? tipAmount / pax : 0
 
   function handleInput(e) {
@@ -27,7 +34,8 @@ export default function ManualScreen({ onContinue, onBack }) {
 
   function handleContinue() {
     if (total <= 0) return
-    onContinue({ nombre: 'Importe manual', total: totalWTip, pax })
+    // Pasamos el total BRUTO — ResultScreen aplica su propia propina
+    onContinue({ nombre: 'Importe manual', total, pax })
   }
 
   return (
@@ -81,8 +89,33 @@ export default function ManualScreen({ onContinue, onBack }) {
             <p style={{ fontWeight: 700, fontSize: 15 }}>Propina</p>
             <p className="text-xs text-sec">por persona</p>
           </div>
+
           <div className="tip-options">
-            {TIP_OPTIONS.map(opt => (
+            {/* Redondear */}
+            <button
+              className={`tip-option tip-option-round${tipPct === null ? ' selected' : ''}`}
+              onClick={() => setTipPct(null)}
+            >
+              <div className="row gap-8" style={{ alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <div className="row gap-6" style={{ alignItems: 'center' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                  </svg>
+                  <span className="pct">Redondear</span>
+                </div>
+                <span className="eur" style={{ fontSize: 11 }}>
+                  {total > 0
+                    ? `→ ${formatEur(round5).replace(' €', '')} o ${formatEur(round10).replace(' €', '')} €`
+                    : '→ —'}
+                </span>
+              </div>
+              <div className="eur" style={{ marginTop: 4, textAlign: 'left' }}>
+                {total > 0 ? `${formatEur(Math.max(0, round5 - total) / pax)} por persona` : '—'}
+              </div>
+            </button>
+
+            {/* Opciones porcentaje */}
+            {PCT_OPTIONS.map(opt => (
               <button
                 key={opt.pct}
                 className={`tip-option${tipPct === opt.pct ? ' selected' : ''}`}

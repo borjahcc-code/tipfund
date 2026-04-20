@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { formatEur } from '../utils/format'
+import { formatEur, nextRound5, nextRound10 } from '../utils/format'
 import PeopleSelector from '../components/PeopleSelector'
 
-const TIP_OPTIONS = [
+const PCT_OPTIONS = [
   { pct: 5,  label: '5%' },
   { pct: 8,  label: '8%' },
   { pct: 10, label: '10%' },
@@ -11,13 +11,16 @@ const TIP_OPTIONS = [
 export default function ResultScreen({ ocr, onPay, onGroup }) {
   const [total,   setTotal]   = useState(ocr.total)
   const [pax,     setPax]     = useState(ocr.pax)
+  // tipPct: number (5/8/10) or null (= redondear)
   const [tipPct,  setTipPct]  = useState(8)
   const [editing, setEditing] = useState(false)
   const [editVal, setEditVal] = useState(String(ocr.total))
 
-  const tipAmount    = total * tipPct / 100
-  const totalWTip    = total + tipAmount
-  const perPerson    = totalWTip / pax
+  const round5  = nextRound5(total)
+  const round10 = nextRound10(total)
+
+  const tipAmount    = tipPct === null ? Math.max(0, round5 - total) : total * tipPct / 100
+  const perPerson    = (total + tipAmount) / pax
   const tipPerPerson = tipAmount / pax
 
   function saveEdit() {
@@ -103,8 +106,31 @@ export default function ResultScreen({ ocr, onPay, onGroup }) {
             <p style={{ fontWeight: 700, fontSize: 15 }}>Propina</p>
             <p className="text-xs text-sec">por persona</p>
           </div>
+
           <div className="tip-options">
-            {TIP_OPTIONS.map(opt => (
+            {/* Opción Redondear — ocupa todo el ancho */}
+            <button
+              className={`tip-option tip-option-round${tipPct === null ? ' selected' : ''}`}
+              onClick={() => setTipPct(null)}
+            >
+              <div className="row gap-8" style={{ alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <div className="row gap-6" style={{ alignItems: 'center' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                  </svg>
+                  <span className="pct">Redondear</span>
+                </div>
+                <span className="eur" style={{ fontSize: 11 }}>
+                  → {formatEur(round5).replace(' €', '')} o {formatEur(round10).replace(' €', '')} €
+                </span>
+              </div>
+              <div className="eur" style={{ marginTop: 4, textAlign: 'left' }}>
+                {formatEur(Math.max(0, round5 - total) / pax)} por persona
+              </div>
+            </button>
+
+            {/* Opciones porcentaje */}
+            {PCT_OPTIONS.map(opt => (
               <button
                 key={opt.pct}
                 className={`tip-option${tipPct === opt.pct ? ' selected' : ''}`}
