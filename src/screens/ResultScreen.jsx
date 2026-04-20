@@ -20,12 +20,20 @@ export default function ResultScreen({ ocr, onPay, onGroup }) {
   const round10 = nextRound10(total)
 
   const tipAmount    = tipPct === null ? Math.max(0, round5 - total) : total * tipPct / 100
-  const perPerson    = (total + tipAmount) / pax
-  const tipPerPerson = tipAmount / pax
+  const basePerPerson = total / pax
+  const perPerson     = basePerPerson + tipAmount / pax
+  const tipPerPerson  = tipAmount / pax
+
+  // TODO: quitar estos logs tras verificar el cálculo
+  console.log('[TipFund] total=', total, 'pax=', pax, 'tipPct=', tipPct, '→ base/persona=', basePerPerson.toFixed(2), 'total/persona=', perPerson.toFixed(2))
 
   function saveEdit() {
     const v = parseFloat(editVal.replace(',', '.'))
-    if (!isNaN(v) && v > 0) setTotal(v)
+    console.log('[TipFund] saveEdit: editVal=', editVal, '→ v=', v)
+    if (!isNaN(v) && v > 0) {
+      setTotal(v)
+      setEditVal(v.toFixed(2).replace('.', ','))
+    }
     setEditing(false)
   }
 
@@ -52,15 +60,25 @@ export default function ResultScreen({ ocr, onPay, onGroup }) {
               {editing ? (
                 <div className="row gap-8">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     className="input-amount"
                     style={{ fontSize: 28, textAlign: 'left', flex: 1 }}
                     value={editVal}
-                    onChange={e => setEditVal(e.target.value)}
+                    onChange={e => {
+                      const v = e.target.value
+                      if (/^[0-9]*[.,]?[0-9]{0,2}$/.test(v)) setEditVal(v)
+                    }}
                     autoFocus
                     onKeyDown={e => e.key === 'Enter' && saveEdit()}
+                    onBlur={saveEdit}
                   />
-                  <button className="btn btn-orange" style={{ width: 'auto', padding: '8px 14px', fontSize: 14 }} onClick={saveEdit}>
+                  <button
+                    className="btn btn-orange"
+                    style={{ width: 'auto', padding: '8px 14px', fontSize: 14 }}
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={saveEdit}
+                  >
                     OK
                   </button>
                 </div>

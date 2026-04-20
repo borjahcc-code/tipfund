@@ -57,6 +57,7 @@ export default function App() {
       case 'result':
         return (
           <ResultScreen
+            key={`${ocr?.nombre}_${ocr?.total}_${ocr?.pax}`}
             ocr={ocr}
             onPay={p => { setPayment(p); setScreen('confirmation') }}
             onGroup={d => { setGroupData(d); setPayment(d); setScreen('group') }}
