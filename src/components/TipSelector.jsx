@@ -55,7 +55,7 @@ export default function TipSelector({ total, pax, mode, onModeChange, selectedPc
         </div>
       ) : (
         /* ── Panel porcentaje ── */
-        <div className="tip-options" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        <div className="tip-options" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
           {PCT_OPTS.map(pct => (
             <button
               key={pct}
