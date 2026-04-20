@@ -1,16 +1,17 @@
 import { useState } from 'react'
-import HomeScreen        from './screens/HomeScreen'
-import ScannerScreen     from './screens/ScannerScreen'
-import ProcessingScreen  from './screens/ProcessingScreen'
-import ResultScreen      from './screens/ResultScreen'
-import ManualScreen      from './screens/ManualScreen'
-import ConfirmationScreen from './screens/ConfirmationScreen'
-import BizumGroupScreen  from './screens/BizumGroupScreen'
+import HomeScreen          from './screens/HomeScreen'
+import ScannerScreen       from './screens/ScannerScreen'
+import ProcessingScreen    from './screens/ProcessingScreen'
+import ResultScreen        from './screens/ResultScreen'
+import ManualScreen        from './screens/ManualScreen'
+import ConfirmationScreen  from './screens/ConfirmationScreen'
+import BizumGroupScreen    from './screens/BizumGroupScreen'
+import BizumTrackingScreen from './screens/BizumTrackingScreen'
 
 export default function App() {
-  const [screen, setScreen] = useState('home')
-  const [ocr,     setOcr]   = useState(null)
-  const [payment, setPayment] = useState(null)
+  const [screen,    setScreen]    = useState('home')
+  const [ocr,       setOcr]       = useState(null)
+  const [payment,   setPayment]   = useState(null)
   const [groupData, setGroupData] = useState(null)
 
   function goHome() {
@@ -76,6 +77,15 @@ export default function App() {
           <ConfirmationScreen
             payment={payment}
             onHome={goHome}
+            onTracking={payment?.pax ? () => setScreen('tracking') : null}
+          />
+        )
+
+      case 'tracking':
+        return (
+          <BizumTrackingScreen
+            payment={payment}
+            onBack={() => setScreen('confirmation')}
           />
         )
 

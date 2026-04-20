@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { formatEur } from '../utils/format'
+import PeopleSelector from '../components/PeopleSelector'
 
 const TIP_OPTIONS = [
   { pct: 5,  label: '5%' },
@@ -14,9 +15,9 @@ export default function ResultScreen({ ocr, onPay, onGroup }) {
   const [editing, setEditing] = useState(false)
   const [editVal, setEditVal] = useState(String(ocr.total))
 
-  const tipAmount   = total * tipPct / 100
-  const totalWTip   = total + tipAmount
-  const perPerson   = totalWTip / pax
+  const tipAmount    = total * tipPct / 100
+  const totalWTip    = total + tipAmount
+  const perPerson    = totalWTip / pax
   const tipPerPerson = tipAmount / pax
 
   function saveEdit() {
@@ -71,7 +72,7 @@ export default function ResultScreen({ ocr, onPay, onGroup }) {
                 style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 12px', fontSize: 13, color: 'var(--text-sec)', cursor: 'pointer', fontFamily: 'inherit' }}
                 onClick={() => { setEditVal(String(total)); setEditing(true) }}
               >
-                Corregir
+                Modificar importe
               </button>
             )}
           </div>
@@ -80,20 +81,11 @@ export default function ResultScreen({ ocr, onPay, onGroup }) {
 
         {/* Personas */}
         <div className="card">
-          <div className="row-between" style={{ marginBottom: 12 }}>
-            <div>
-              <p style={{ fontWeight: 700, fontSize: 15 }}>¿Cuántos sois?</p>
-              <p className="text-xs text-sec">Incluida tu parte</p>
-            </div>
+          <div style={{ marginBottom: 14 }}>
+            <p style={{ fontWeight: 700, fontSize: 15 }}>¿Cuántos sois?</p>
+            <p className="text-xs text-sec">Incluida tu parte</p>
           </div>
-          <div className="people-selector">
-            <button className="btn-circle" onClick={() => setPax(p => Math.max(2, p - 1))} disabled={pax <= 2}>−</button>
-            <div style={{ textAlign: 'center' }}>
-              <div className="people-count">{pax}</div>
-              <div className="people-label">personas</div>
-            </div>
-            <button className="btn-circle" onClick={() => setPax(p => Math.min(12, p + 1))} disabled={pax >= 12}>+</button>
-          </div>
+          <PeopleSelector value={pax} onChange={setPax} />
         </div>
 
         {/* Resultado por persona */}
@@ -136,7 +128,6 @@ export default function ResultScreen({ ocr, onPay, onGroup }) {
 
           {/* Bizum */}
           <button className="pay-btn pay-btn-bizum" onClick={() => onPay({ perPerson, tipPerPerson, method: 'bizum' })}>
-            {/* Bz logo */}
             <div style={{
               width: 38, height: 38, borderRadius: 10, background: '#5CB85C',
               display: 'flex', alignItems: 'center', justifyContent: 'center',

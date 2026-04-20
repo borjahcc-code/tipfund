@@ -1,13 +1,24 @@
 import { useState } from 'react'
 import { formatEur } from '../utils/format'
 import Logo from '../components/Logo'
+import PeopleSelector from '../components/PeopleSelector'
+
+const TIP_OPTIONS = [
+  { pct: 5,  label: '5%' },
+  { pct: 8,  label: '8%' },
+  { pct: 10, label: '10%' },
+]
 
 export default function ManualScreen({ onContinue, onBack }) {
   const [rawValue, setRawValue] = useState('')
-  const [pax, setPax] = useState(2)
+  const [pax,      setPax]      = useState(2)
+  const [tipPct,   setTipPct]   = useState(8)
 
-  const total = parseFloat(rawValue.replace(',', '.')) || 0
-  const perPerson = total > 0 ? total / pax : 0
+  const total        = parseFloat(rawValue.replace(',', '.')) || 0
+  const tipAmount    = total * tipPct / 100
+  const totalWTip    = total + tipAmount
+  const perPerson    = total > 0 ? totalWTip / pax : 0
+  const tipPerPerson = total > 0 ? tipAmount / pax : 0
 
   function handleInput(e) {
     const v = e.target.value
@@ -16,11 +27,7 @@ export default function ManualScreen({ onContinue, onBack }) {
 
   function handleContinue() {
     if (total <= 0) return
-    onContinue({
-      nombre: 'Importe manual',
-      total,
-      pax,
-    })
+    onContinue({ nombre: 'Importe manual', total: totalWTip, pax })
   }
 
   return (
@@ -38,13 +45,14 @@ export default function ManualScreen({ onContinue, onBack }) {
         <Logo size={22} />
       </div>
 
-      <div className="stack gap-20 p-16" style={{ flex: 1, paddingTop: 28 }}>
+      <div className="stack gap-16 p-16" style={{ flex: 1, paddingTop: 24, overflowY: 'auto', paddingBottom: 32 }}>
+
         {/* Amount input */}
         <div className="card stack gap-12" style={{ textAlign: 'center' }}>
           <p style={{ fontSize: 13, color: 'var(--text-sec)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Total de la cuenta
           </p>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <input
               type="text"
               inputMode="decimal"
@@ -64,13 +72,28 @@ export default function ManualScreen({ onContinue, onBack }) {
           <div style={{ marginBottom: 14 }}>
             <p style={{ fontWeight: 700, fontSize: 15 }}>¿Cuántos sois?</p>
           </div>
-          <div className="people-selector">
-            <button className="btn-circle" onClick={() => setPax(p => Math.max(2, p - 1))} disabled={pax <= 2}>−</button>
-            <div style={{ textAlign: 'center' }}>
-              <div className="people-count">{pax}</div>
-              <div className="people-label">personas</div>
-            </div>
-            <button className="btn-circle" onClick={() => setPax(p => Math.min(12, p + 1))} disabled={pax >= 12}>+</button>
+          <PeopleSelector value={pax} onChange={setPax} />
+        </div>
+
+        {/* Propina */}
+        <div className="card stack gap-12">
+          <div className="row-between">
+            <p style={{ fontWeight: 700, fontSize: 15 }}>Propina</p>
+            <p className="text-xs text-sec">por persona</p>
+          </div>
+          <div className="tip-options">
+            {TIP_OPTIONS.map(opt => (
+              <button
+                key={opt.pct}
+                className={`tip-option${tipPct === opt.pct ? ' selected' : ''}`}
+                onClick={() => setTipPct(opt.pct)}
+              >
+                <div className="pct">{opt.label}</div>
+                <div className="eur">
+                  {total > 0 ? formatEur(total * opt.pct / 100 / pax) : '—'}
+                </div>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -80,8 +103,16 @@ export default function ManualScreen({ onContinue, onBack }) {
             <p className="amount-label">cada persona paga</p>
             <p className="amount-big">{formatEur(perPerson)}</p>
             <p style={{ fontSize: 12, color: 'rgba(245,242,236,0.45)', marginTop: 4 }}>
-              sin propina · puedes añadirla en el siguiente paso
+              {formatEur(total / pax)} base + {formatEur(tipPerPerson)} propina
             </p>
+          </div>
+        )}
+
+        {/* Total a pagar */}
+        {total > 0 && (
+          <div className="card row-between" style={{ padding: '14px 16px' }}>
+            <span style={{ fontSize: 15, fontWeight: 600 }}>Total a pagar</span>
+            <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--orange)' }}>{formatEur(perPerson)}</span>
           </div>
         )}
 
@@ -90,7 +121,7 @@ export default function ManualScreen({ onContinue, onBack }) {
           className="btn btn-orange"
           onClick={handleContinue}
           disabled={total <= 0}
-          style={{ opacity: total > 0 ? 1 : 0.4, marginTop: 'auto' }}
+          style={{ opacity: total > 0 ? 1 : 0.4, marginTop: 8 }}
         >
           Continuar
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
