@@ -25,7 +25,15 @@ export default function BizumGroupScreen({ data, onDone, onSkip, onBurger }) {
         })
       }, 400 + i * 300)
     })
-    setTimeout(() => onDone(), 400 + (others - 1) * 300 + 800)
+    setTimeout(() => {
+      const comensales = names.map((nombre, i) => ({
+        nombre,
+        telefono: PHONES[i],
+        importe: data.perPerson,
+        pagado: false,
+      }))
+      onDone(comensales)
+    }, 400 + (others - 1) * 300 + 800)
   }
 
   return (

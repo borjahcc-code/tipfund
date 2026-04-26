@@ -57,6 +57,21 @@ export default function App() {
     if (id === 'pending') { setScreen('pending'); return }
   }
 
+  function addPendingFromGroup(comensales) {
+    const now    = new Date()
+    const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+    const fecha  = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+    const restaurante = (ocr?.nombre === 'Importe manual' || !ocr?.nombre) ? 'Cuenta manual' : ocr.nombre
+    const base = Date.now()
+    setPending(prev => [{
+      id: base,
+      fecha,
+      restaurante,
+      totalCuenta: (groupData?.perPerson || 0) * (groupData?.pax || 1),
+      comensales: comensales.map((c, i) => ({ ...c, id: base + i + 1 })),
+    }, ...prev])
+  }
+
   function togglePaid(cenaId, comenId) {
     setPending(prev => prev.map(cena =>
       cena.id !== cenaId ? cena : {
@@ -121,7 +136,7 @@ export default function App() {
         return (
           <BizumGroupScreen
             data={groupData}
-            onDone={() => setScreen('confirmation')}
+            onDone={comensales => { addPendingFromGroup(comensales); setScreen('confirmation') }}
             onSkip={() => setScreen('confirmation')}
             onBurger={burger}
           />

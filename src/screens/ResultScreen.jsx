@@ -193,7 +193,7 @@ export default function ResultScreen({ ocr, onPay, onGroup, onBurger }) {
             <div className="pay-btn-info">
               <div className="row gap-8" style={{ alignItems: 'center' }}>
                 <span className="pay-btn-name" style={{ color: 'var(--text-sec)' }}>Pedir Bizum al resto</span>
-                <span className="badge badge-soon" style={{ fontSize: 10 }}>Próximamente</span>
+                <span className="badge badge-soon" style={{ fontSize: 10 }}>Beta</span>
               </div>
               <p className="pay-btn-sub text-sec">Solicita a cada comensal</p>
             </div>
