@@ -45,7 +45,7 @@ export default function ShareScreen({ payment, user, onDone, onSkip, onBurger })
       setTimeout(() => {
         sendTo(i)
         if (i === others - 1) setSending(false)
-      }, i * 500)
+      }, i * 800)
     })
   }
 

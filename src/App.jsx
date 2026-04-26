@@ -156,7 +156,7 @@ export default function App() {
             user={user}
             detectedRestaurant={detectedRestaurant}
             onPay={p => { setPayment(p); setScreen('share') }}
-            onGroup={d => { setGroupData(d); setPayment(d); setScreen('group') }}
+            onGroup={d => { setGroupData(d); setPayment(d); setScreen('share') }}
             onBurger={burger}
           />
         )
