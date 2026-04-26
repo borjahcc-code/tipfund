@@ -68,8 +68,15 @@ export default function App() {
       alert('Configura tu Google Client ID en index.html para activar esta función')
       return
     }
+    if (!window.google?.accounts?.id) {
+      // GSI script not loaded yet — retry once it fires onload
+      window.addEventListener('load', () => {
+        try { window.google?.accounts?.id?.prompt() } catch {}
+      }, { once: true })
+      return
+    }
     try {
-      window.google?.accounts?.id?.prompt()
+      window.google.accounts.id.prompt()
     } catch {}
   }
 
