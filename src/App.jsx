@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import HomeScreen            from './screens/HomeScreen'
 import ScannerScreen         from './screens/ScannerScreen'
 import ProcessingScreen      from './screens/ProcessingScreen'
@@ -9,6 +9,8 @@ import BizumGroupScreen      from './screens/BizumGroupScreen'
 import BizumTrackingScreen   from './screens/BizumTrackingScreen'
 import PendingPaymentsScreen from './screens/PendingPaymentsScreen'
 import BurgerMenu            from './components/BurgerMenu'
+import UserAvatar            from './components/UserAvatar'
+import { getUser, handleGoogleCredential, createAnonymousUser, logout } from './utils/auth'
 
 // ── Datos de ejemplo precargados ─────────────────────────────
 const INITIAL_PENDING = [
@@ -42,8 +44,31 @@ export default function App() {
   const [groupData, setGroupData] = useState(null)
   const [menuOpen,  setMenuOpen]  = useState(false)
   const [pending,   setPending]   = useState(INITIAL_PENDING)
+  const [user,      setUser]      = useState(() => getUser() || createAnonymousUser())
+  // Pre-detected restaurant from HomeScreen geo detection
+  const [detectedRestaurant, setDetectedRestaurant] = useState(null)
 
   const pendingCount = pending.flatMap(d => d.comensales).filter(c => !c.pagado).length
+
+  // Register global Google One Tap callback
+  useEffect(() => {
+    window.handleGoogleSignIn = (credentialResponse) => {
+      const u = handleGoogleCredential(credentialResponse)
+      if (u) setUser(u)
+    }
+    return () => { delete window.handleGoogleSignIn }
+  }, [])
+
+  function triggerGoogleLogin() {
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.prompt()
+    }
+  }
+
+  function handleLogout() {
+    logout()
+    setUser(createAnonymousUser())
+  }
 
   function goHome() {
     setScreen('home')
@@ -93,6 +118,7 @@ export default function App() {
             onScan={()   => setScreen('scanner')}
             onManual={() => setScreen('manual')}
             onBurger={burger}
+            onDetectRestaurant={setDetectedRestaurant}
           />
         )
 
@@ -126,6 +152,8 @@ export default function App() {
           <ResultScreen
             key={`${ocr?.nombre}_${ocr?.total}_${ocr?.pax}`}
             ocr={ocr}
+            user={user}
+            detectedRestaurant={detectedRestaurant}
             onPay={p => { setPayment(p); setScreen('confirmation') }}
             onGroup={d => { setGroupData(d); setPayment(d); setScreen('group') }}
             onBurger={burger}
@@ -172,13 +200,22 @@ export default function App() {
         )
 
       default:
-        return <HomeScreen onScan={() => setScreen('scanner')} onManual={() => setScreen('manual')} onBurger={burger} />
+        return <HomeScreen onScan={() => setScreen('scanner')} onManual={() => setScreen('manual')} onBurger={burger} onDetectRestaurant={setDetectedRestaurant} />
     }
   }
 
   return (
     <div className="app-shell">
       {renderScreen()}
+
+      {/* User avatar — fixed overlay, left of burger button */}
+      <div style={{ position: 'fixed', top: 14, right: 56, zIndex: 40 }}>
+        <UserAvatar
+          user={user}
+          onLogin={triggerGoogleLogin}
+          onLogout={handleLogout}
+        />
+      </div>
 
       {menuOpen && (
         <BurgerMenu

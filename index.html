@@ -16,10 +16,30 @@
     <meta name="apple-mobile-web-app-title" content="tipFund" />
     <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
 
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:url"         content="https://tipfund.netlify.app" />
+    <meta property="og:title"       content="tipFund — tu parte de la cena" />
+    <meta property="og:description" content="Paga tu parte en 10 segundos. Sin efectivo, sin líos." />
+    <meta property="og:image"       content="https://tipfund.netlify.app/og-image.svg" />
+    <meta name="twitter:card"       content="summary_large_image" />
+    <meta name="twitter:title"      content="tipFund — tu parte de la cena" />
+    <meta name="twitter:description" content="Paga tu parte en 10 segundos. Sin efectivo, sin líos." />
+    <meta name="twitter:image"      content="https://tipfund.netlify.app/og-image.svg" />
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg" />
+
+    <!-- Google One Tap -->
+    <meta name="google-signin-client_id" content="TU_CLIENT_ID_AQUI" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
+    <div id="g_id_onload"
+      data-client_id="TU_CLIENT_ID_AQUI"
+      data-callback="handleGoogleSignIn"
+      data-auto_prompt="true">
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import Logo from '../components/Logo'
 import { BurgerButton } from '../components/BurgerMenu'
+import { detectNearbyRestaurants, getPlacesApiKey } from '../utils/places'
 
 const STEPS = [
   { n: 1, text: 'Escanea el ticket' },
@@ -7,7 +9,29 @@ const STEPS = [
   { n: 3, text: 'Paga tu parte' },
 ]
 
-export default function HomeScreen({ onScan, onManual, onBurger }) {
+export default function HomeScreen({ onScan, onManual, onBurger, onDetectRestaurant }) {
+  const [geoStatus, setGeoStatus]   = useState('idle') // idle | loading | done | error
+  const [detectedName, setDetected] = useState('')
+
+  async function handleGeoDetect() {
+    if (!getPlacesApiKey()) {
+      setGeoStatus('error')
+      setDetected('API key no configurada')
+      return
+    }
+    setGeoStatus('loading')
+    try {
+      const places = await detectNearbyRestaurants()
+      const name = places[0] || ''
+      setDetected(name)
+      setGeoStatus(name ? 'done' : 'error')
+      if (name) onDetectRestaurant?.(name)
+    } catch {
+      setGeoStatus('error')
+      setDetected('No se pudo detectar la ubicación')
+    }
+  }
+
   return (
     <div className="screen">
       {/* Header */}
@@ -41,6 +65,36 @@ export default function HomeScreen({ onScan, onManual, onBurger }) {
               <span style={{ fontSize: 15, color: '#F5F2EC', fontWeight: 500 }}>{text}</span>
             </div>
           ))}
+        </div>
+
+        {/* Geo detect — pre-fill restaurant before scanning */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <button
+            onClick={handleGeoDetect}
+            disabled={geoStatus === 'loading'}
+            style={{
+              background: 'none', border: '1px solid var(--border)', borderRadius: 10,
+              padding: '8px 14px', fontSize: 13, color: 'var(--text-sec)',
+              cursor: geoStatus === 'loading' ? 'default' : 'pointer',
+              fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6,
+              opacity: geoStatus === 'loading' ? 0.6 : 1,
+            }}
+          >
+            {geoStatus === 'loading' ? (
+              <>
+                <div style={{ width: 12, height: 12, border: '1.5px solid var(--border)', borderTopColor: 'var(--text-sec)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}/>
+                Detectando...
+              </>
+            ) : '📍 Detectar restaurante'}
+          </button>
+          {geoStatus === 'done' && (
+            <span style={{ fontSize: 13, color: 'var(--teal-dark)', fontWeight: 600 }}>
+              ✓ {detectedName}
+            </span>
+          )}
+          {geoStatus === 'error' && (
+            <span style={{ fontSize: 12, color: 'var(--orange)' }}>{detectedName}</span>
+          )}
         </div>
 
         {/* Primary CTA */}

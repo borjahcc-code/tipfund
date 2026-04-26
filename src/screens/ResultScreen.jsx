@@ -1,16 +1,21 @@
 import { useState } from 'react'
 import { formatEur, smartRound } from '../utils/format'
-import PeopleSelector from '../components/PeopleSelector'
-import TipSelector    from '../components/TipSelector'
-import { BurgerButton } from '../components/BurgerMenu'
+import PeopleSelector      from '../components/PeopleSelector'
+import TipSelector         from '../components/TipSelector'
+import { BurgerButton }    from '../components/BurgerMenu'
+import ShareSection        from '../components/ShareSection'
+import RestaurantDetector  from '../components/RestaurantDetector'
 
-export default function ResultScreen({ ocr, onPay, onGroup, onBurger }) {
-  const [total,   setTotal]   = useState(ocr.total)
-  const [pax,     setPax]     = useState(ocr.pax)
-  const [tipMode, setTipMode] = useState('round')
-  const [tipPct,  setTipPct]  = useState(8)
-  const [editing, setEditing] = useState(false)
-  const [editVal, setEditVal] = useState(String(ocr.total))
+export default function ResultScreen({ ocr, user, detectedRestaurant, onPay, onGroup, onBurger }) {
+  const [total,          setTotal]          = useState(ocr.total)
+  const [pax,            setPax]            = useState(ocr.pax)
+  const [tipMode,        setTipMode]        = useState('round')
+  const [tipPct,         setTipPct]         = useState(8)
+  const [editing,        setEditing]        = useState(false)
+  const [editVal,        setEditVal]        = useState(String(ocr.total))
+  const [restaurantName, setRestaurantName] = useState(
+    ocr.nombre && ocr.nombre !== 'Importe manual' ? ocr.nombre : (detectedRestaurant || '')
+  )
 
   // ── Cálculo principal ─────────────────────────────────────
   const roundedTotal = smartRound(total)
@@ -18,9 +23,9 @@ export default function ResultScreen({ ocr, onPay, onGroup, onBurger }) {
     ? Math.max(0, roundedTotal - total)
     : total * tipPct / 100
 
-  const basePerPerson = total / pax                  // 100 / 4 = 25,00 €
+  const basePerPerson = total / pax
   const tipPerPerson  = tipAmount / pax
-  const perPerson     = basePerPerson + tipPerPerson  // total a pagar por persona
+  const perPerson     = basePerPerson + tipPerPerson
   // ──────────────────────────────────────────────────────────
 
   function saveEdit() {
@@ -41,8 +46,8 @@ export default function ResultScreen({ ocr, onPay, onGroup, onBurger }) {
           OCR listo
         </span>
         <div className="row gap-8">
-          <span style={{ fontSize: 13, color: 'rgba(245,242,236,0.6)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {ocr.nombre}
+          <span style={{ fontSize: 13, color: 'rgba(245,242,236,0.6)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {restaurantName || ocr.nombre}
           </span>
           <BurgerButton onClick={onBurger} />
         </div>
@@ -97,7 +102,12 @@ export default function ResultScreen({ ocr, onPay, onGroup, onBurger }) {
               </button>
             )}
           </div>
-          <p className="text-xs text-sec">{ocr.nombre}</p>
+
+          {/* Restaurant name + detector */}
+          <RestaurantDetector
+            currentName={restaurantName || ocr.nombre}
+            onSelect={setRestaurantName}
+          />
         </div>
 
         {/* Personas */}
@@ -199,6 +209,15 @@ export default function ResultScreen({ ocr, onPay, onGroup, onBurger }) {
             </div>
           </button>
         </div>
+
+        {/* WhatsApp share */}
+        <ShareSection
+          pax={pax}
+          perPerson={perPerson}
+          restaurantName={restaurantName || ocr.nombre}
+          user={user}
+        />
+
       </div>
     </div>
   )
