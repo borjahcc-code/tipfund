@@ -3,7 +3,6 @@ import { formatEur, smartRound } from '../utils/format'
 import PeopleSelector      from '../components/PeopleSelector'
 import TipSelector         from '../components/TipSelector'
 import { BurgerButton }    from '../components/BurgerMenu'
-import ShareSection        from '../components/ShareSection'
 import RestaurantDetector  from '../components/RestaurantDetector'
 
 export default function ResultScreen({ ocr, user, detectedRestaurant, onPay, onGroup, onBurger }) {
@@ -153,7 +152,7 @@ export default function ResultScreen({ ocr, user, detectedRestaurant, onPay, onG
         <div className="stack gap-8">
 
           {/* Bizum */}
-          <button className="pay-btn pay-btn-bizum" onClick={() => onPay({ perPerson, tipPerPerson, method: 'bizum' })}>
+          <button className="pay-btn pay-btn-bizum" onClick={() => onPay({ perPerson, tipPerPerson, method: 'bizum', pax, restaurantName })}>
             <div style={{
               width: 38, height: 38, borderRadius: 10, background: '#5CB85C',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -170,7 +169,7 @@ export default function ResultScreen({ ocr, user, detectedRestaurant, onPay, onG
           </button>
 
           {/* Tarjeta */}
-          <button className="pay-btn pay-btn-card" onClick={() => onPay({ perPerson, tipPerPerson, method: 'card' })}>
+          <button className="pay-btn pay-btn-card" onClick={() => onPay({ perPerson, tipPerPerson, method: 'card', pax, restaurantName })}>
             <div style={{
               width: 38, height: 38, borderRadius: 10, background: 'var(--beige)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
@@ -210,13 +209,6 @@ export default function ResultScreen({ ocr, user, detectedRestaurant, onPay, onG
           </button>
         </div>
 
-        {/* WhatsApp share */}
-        <ShareSection
-          pax={pax}
-          perPerson={perPerson}
-          restaurantName={restaurantName || ocr.nombre}
-          user={user}
-        />
 
       </div>
     </div>

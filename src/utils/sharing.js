@@ -51,15 +51,7 @@ export function buildMessage({ organizerName, amount, restaurantName, sessionId,
   const restaurant = restaurantName && restaurantName !== 'Importe manual' ? restaurantName : 'el restaurante'
   const link       = `https://tipfund.netlify.app/pagar/${sessionId}-${comensalIndex}`
 
-  return `Ey, que ${mealType} no se paga sola 😄
-
-${organizerName} dice que le debes ${amountStr} € de ${restaurant} 🍽️
-
-(Y tiene pruebas 🧾)
-
-Sin efectivo, sin líos, en 10 segundos:
-👇
-${link}`
+  return `Ey, que ${mealType} no se paga sola \uD83D\uDE04\n\n${organizerName} dice que le debes ${amountStr} \u20AC de ${restaurant} \uD83C\uDF7D\uFE0F\n\n(Y tiene pruebas \uD83E\uDDFE)\n\nSin efectivo, sin l\u00EDos, en 10 segundos:\n\uD83D\uDC47\n${link}`
 }
 
 export function logSend({ sessionId, comensalIndex, organizerName, amount, restaurantName }) {

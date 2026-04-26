@@ -8,6 +8,7 @@ import ConfirmationScreen    from './screens/ConfirmationScreen'
 import BizumGroupScreen      from './screens/BizumGroupScreen'
 import BizumTrackingScreen   from './screens/BizumTrackingScreen'
 import PendingPaymentsScreen from './screens/PendingPaymentsScreen'
+import ShareScreen           from './screens/ShareScreen'
 import BurgerMenu            from './components/BurgerMenu'
 import UserAvatar            from './components/UserAvatar'
 import { getUser, handleGoogleCredential, createAnonymousUser, logout } from './utils/auth'
@@ -154,7 +155,7 @@ export default function App() {
             ocr={ocr}
             user={user}
             detectedRestaurant={detectedRestaurant}
-            onPay={p => { setPayment(p); setScreen('confirmation') }}
+            onPay={p => { setPayment(p); setScreen('share') }}
             onGroup={d => { setGroupData(d); setPayment(d); setScreen('group') }}
             onBurger={burger}
           />
@@ -165,6 +166,17 @@ export default function App() {
           <BizumGroupScreen
             data={groupData}
             onDone={comensales => { addPendingFromGroup(comensales); setScreen('confirmation') }}
+            onSkip={() => setScreen('confirmation')}
+            onBurger={burger}
+          />
+        )
+
+      case 'share':
+        return (
+          <ShareScreen
+            payment={payment}
+            user={user}
+            onDone={() => setScreen('confirmation')}
             onSkip={() => setScreen('confirmation')}
             onBurger={burger}
           />
