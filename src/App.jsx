@@ -51,19 +51,26 @@ export default function App() {
 
   const pendingCount = pending.flatMap(d => d.comensales).filter(c => !c.pagado).length
 
-  // Register global Google One Tap callback
+  // Register global Google One Tap callback — silent on any error
   useEffect(() => {
     window.handleGoogleSignIn = (credentialResponse) => {
-      const u = handleGoogleCredential(credentialResponse)
-      if (u) setUser(u)
+      try {
+        const u = handleGoogleCredential(credentialResponse)
+        if (u) setUser(u)
+      } catch {}
     }
     return () => { delete window.handleGoogleSignIn }
   }, [])
 
   function triggerGoogleLogin() {
-    if (window.google?.accounts?.id) {
-      window.google.accounts.id.prompt()
+    const clientId = document.querySelector('meta[name="google-signin-client_id"]')?.content
+    if (!clientId || clientId === 'TU_CLIENT_ID_AQUI') {
+      alert('Configura tu Google Client ID en index.html para activar esta función')
+      return
     }
+    try {
+      window.google?.accounts?.id?.prompt()
+    } catch {}
   }
 
   function handleLogout() {
@@ -220,13 +227,20 @@ export default function App() {
     <div className="app-shell">
       {renderScreen()}
 
-      {/* User avatar — fixed overlay, left of burger button */}
-      <div style={{ position: 'fixed', top: 14, right: 56, zIndex: 40 }}>
-        <UserAvatar
-          user={user}
-          onLogin={triggerGoogleLogin}
-          onLogout={handleLogout}
-        />
+      {/* User avatar — fixed overlay, vertically centred in header, right of burger */}
+      <div style={{
+        position: 'fixed', top: 0, right: 0, zIndex: 40,
+        height: 60, paddingRight: 60,
+        display: 'flex', alignItems: 'center',
+        pointerEvents: 'none',
+      }}>
+        <div style={{ pointerEvents: 'auto' }}>
+          <UserAvatar
+            user={user}
+            onLogin={triggerGoogleLogin}
+            onLogout={handleLogout}
+          />
+        </div>
       </div>
 
       {menuOpen && (
